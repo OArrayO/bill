@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bdqn.dao.UserMapper">
+    <resultMap id="Billandtype" type="com.bdqn.eneity.Bills">
+    <id property="id" column="id"></id>
+    <result property="title" column="title"></result>
+    <result property="title_time" column="title_time"></result>
+    <result property="name" column="name"></result>
+    <result property="type_id" column="type_id"></result>
+    <result property="price" column="price"></result>
+    <result property="explain" column="explain"></result>
+    <association property="billtype" javaType="com.bdqn.eneity.Billtype">
+        <id property="id" column="type_id"></id>
+        <result property="name" column="name"></result>
+    </association>
+</resultMap>
+    <select id="poBills" resultType="int">
+        select  COUNT(*) from bills
+        <where>
+            <if test="fild!=-1">
+                AND type_id =#{fild}
+            </if>
+            <if test="frdate!=null">
+                AND title_time>=DATE_FORMAT(#{frdate},'%Y-%m-%d')
+            </if>
+            <if test="twDate!=null">
+                AND title_time&lt;=DATE_FORMAT(#{twDate},'%Y-%m-%d')
+            </if>
+        </where>
+
+    </select>
+    <select id="sBills" resultMap="Billandtype">
+        select bills.id,title,name,type_id,price,`explain` from bills
+        join till_type on bills.type_id=till_type.id
+        <where>
+            <if test="fild!=-1 and fild!=''">
+
+                AND type_id =#{fild}
+            </if>
+            <if test="frdate!=null">
+                AND title_time>=DATE_FORMAT(#{frdate},'%Y-%m-%d')
+            </if>
+            <if test="twDate!=null">
+                AND title_time&lt;=DATE_FORMAT(#{twDate},'%Y-%m-%d')
+            </if>
+        </where>
+        ORDER BY title_time DESC limit #{from },#{pageSize}
+    </select>
+        <select id="bills" resultType="int" parameterType="com.bdqn.eneity.Bills">
+                INSERT INTO bills(title,title_time,type_id,price,`explain`) VALUES (#{title},#{title_time},#{type_id},#{price},#{explain})
+        </select>
+        <select id="tBills"  resultType="com.bdqn.eneity.Billtype">
+            select * from till_type;
+        </select>
+	</mapper>
